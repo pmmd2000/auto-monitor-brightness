@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <AssemblyName>Brightly</AssemblyName>
+    <RootNamespace>Brightly</RootNamespace>
+    <ApplicationIcon>assets\Brightly.ico</ApplicationIcon>
+    <Version>0.1.0</Version>
+    <InformationalVersion>0.1.0-beta</InformationalVersion>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Product>Brightly</Product>
+    <Description>Automatic monitor brightness from the sun and the sky</Description>
+
+    <!-- Keep the footprint small: no satellite resources, workstation non-concurrent GC. -->
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>false</ConcurrentGarbageCollection>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="assets\Brightly.ico" LogicalName="Brightly.ico" />
+  </ItemGroup>
+
+</Project>
