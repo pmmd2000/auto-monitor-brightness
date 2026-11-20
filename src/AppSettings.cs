@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 public enum BrightnessMode { Sun, Schedule }
 

@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 internal static class Native
 {

@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Win32;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 public sealed class TrayApp : ApplicationContext
 {
@@ -38,7 +38,7 @@ public sealed class TrayApp : ApplicationContext
         advanced.DropDownItems.Add("Re-apply brightness now", null, (_, _) => _ = ctl.TickAsync(TickKind.Force, "re-apply requested"));
         advanced.DropDownItems.Add("Open log", null, (_, _) => OpenLog());
         advanced.DropDownItems.Add(new ToolStripSeparator());
-        advanced.DropDownItems.Add("Uninstall Brightly…", null, (_, _) => Uninstall());
+        advanced.DropDownItems.Add("Uninstall Auto Monitor Brightness…", null, (_, _) => Uninstall());
 
         var settings = new ToolStripMenuItem("Settings…", null, (_, _) => ShowSettings()) { Font = new Font(menu.Font, FontStyle.Bold) };
         menu.Items.AddRange(new ToolStripItem[]
@@ -52,7 +52,7 @@ public sealed class TrayApp : ApplicationContext
         menu.Opening += (_, _) => RefreshMenu();
 
         trayIcon = AppIcon.Sized(SystemInformation.SmallIconSize);
-        tray = new NotifyIcon { ContextMenuStrip = menu, Icon = trayIcon, Text = "Brightly", Visible = true };
+        tray = new NotifyIcon { ContextMenuStrip = menu, Icon = trayIcon, Text = "Auto Monitor Brightness", Visible = true };
         tray.MouseClick += (_, e) => { if (e.Button == MouseButtons.Left) ToggleSlider(); };
         tray.BalloonTipClicked += (_, _) => ShowSettings();
 
@@ -128,7 +128,7 @@ public sealed class TrayApp : ApplicationContext
 
     void RefreshUi()
     {
-        var tip = "Brightly\n" + StatusText();
+        var tip = "Auto Monitor Brightness\n" + StatusText();
         tray.Text = tip.Length > 127 ? tip[..127] : tip;
         if (menu.Visible) RefreshMenu();
         if (slider is { Visible: true }) slider.SetStatus(ShownBrightness(), StatusText());
@@ -138,7 +138,7 @@ public sealed class TrayApp : ApplicationContext
         if (!ctl.Settings.HasLocation && ctl.LocationError != null && !ctl.DetectingLocation && !windowOpen && !locationBalloonShown)
         {
             locationBalloonShown = true;
-            tray.ShowBalloonTip(10000, "Brightly", "Couldn't find your location automatically. Click here to choose your city.", ToolTipIcon.Info);
+            tray.ShowBalloonTip(10000, "Auto Monitor Brightness", "Couldn't find your location automatically. Click here to choose your city.", ToolTipIcon.Info);
         }
     }
 
@@ -183,9 +183,9 @@ public sealed class TrayApp : ApplicationContext
     void Uninstall()
     {
         var answer = MessageBox.Show(
-            "Remove Brightly from this PC?\n\nThis stops it, removes it from startup and deletes its settings. " +
+            "Remove Auto Monitor Brightness from this PC?\n\nThis stops it, removes it from startup and deletes its settings. " +
             "Your monitors stay at their current brightness.",
-            "Uninstall Brightly", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
+            "Uninstall Auto Monitor Brightness", MessageBoxButtons.OKCancel, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2);
         if (answer != DialogResult.OK) return;
         ExitThread();
         Installer.Uninstall();
@@ -193,7 +193,7 @@ public sealed class TrayApp : ApplicationContext
 
     protected override void ExitThreadCore()
     {
-        Log.Write("Brightly exiting");
+        Log.Write("Auto Monitor Brightness exiting");
         SystemEvents.SessionSwitch -= OnSessionSwitch;
         showWait.Unregister(null);
         ctl.Dispose();
@@ -225,7 +225,7 @@ public sealed class SliderPopup : Form
         AutoScaleDimensions = new SizeF(96F, 96F);
         AutoScaleMode = AutoScaleMode.Dpi;
         FormBorderStyle = FormBorderStyle.FixedToolWindow;
-        Text = "Brightly";
+        Text = "Auto Monitor Brightness";
         Font = new Font("Segoe UI", 9F);
         ShowInTaskbar = false;
         TopMost = true;

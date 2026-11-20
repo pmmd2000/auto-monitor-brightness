@@ -1,4 +1,4 @@
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 public enum TickKind
 {
@@ -40,7 +40,7 @@ public sealed class Controller : IDisposable
 
     public void Start()
     {
-        Log.Write("Brightly started");
+        Log.Write("Auto Monitor Brightness started");
         _ = TickAsync(TickKind.Wake, "startup");
         _ = DetectLocationAsync();
         timer = new System.Threading.Timer(_ =>
@@ -259,7 +259,7 @@ public sealed class Controller : IDisposable
                 {
                     PausedUntilUtc = now.AddMinutes(Math.Max(5, s.OverrideMinutes));
                     PauseReason = $"manual change on {m.Name}";
-                    Log.Write($"{m.Name}: brightness changed outside Brightly ({expected}% → {cur}%). " +
+                    Log.Write($"{m.Name}: brightness changed outside Auto Monitor Brightness ({expected}% → {cur}%). " +
                               $"Pausing until {PausedUntilUtc.Value.ToLocalTime():HH:mm}.");
                 }
 

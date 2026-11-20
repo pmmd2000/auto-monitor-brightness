@@ -2,7 +2,7 @@ using System.Diagnostics;
 using System.Drawing.Drawing2D;
 using System.Globalization;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 public sealed class AdvancedForm : Form
 {
@@ -50,7 +50,7 @@ public sealed class AdvancedForm : Form
         SuspendLayout();
         AutoScaleDimensions = new SizeF(96F, 96F);
         AutoScaleMode = AutoScaleMode.Dpi;
-        Text = "Brightly · Advanced settings";
+        Text = "Auto Monitor Brightness · Advanced settings";
         Icon = AppIcon.Full;
         StartPosition = FormStartPosition.CenterScreen;
         ClientSize = new Size(760, 740);
@@ -387,7 +387,7 @@ public sealed class AdvancedForm : Form
         var s = Build(errors);
         if (errors.Count > 0)
         {
-            MessageBox.Show(this, string.Join("\n", errors), "Brightly", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            MessageBox.Show(this, string.Join("\n", errors), "Auto Monitor Brightness", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             return;
         }
         try
@@ -399,7 +399,7 @@ public sealed class AdvancedForm : Form
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "Could not save settings: " + ex.Message, "Brightly", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(this, "Could not save settings: " + ex.Message, "Auto Monitor Brightness", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
     }
 

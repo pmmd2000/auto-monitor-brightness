@@ -1,9 +1,9 @@
 using System.Globalization;
 using System.Text;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
-/// <summary>Brightly.exe --selftest out.txt [lat lon] — read-only diagnostics (never writes to the monitors).</summary>
+/// <summary>AutoMonitorBrightness.exe --selftest out.txt [lat lon] — read-only diagnostics (never writes to the monitors).</summary>
 internal static class SelfTest
 {
     public static int Run(string[] args)

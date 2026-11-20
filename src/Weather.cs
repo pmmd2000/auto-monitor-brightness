@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Net.Http.Headers;
 using System.Text.Json;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 public sealed record WeatherSnapshot(
     double CloudCover,       // %
@@ -24,7 +24,7 @@ public sealed class WeatherService
     static HttpClient CreateClient()
     {
         var c = new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
-        c.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Brightly", "1.0"));
+        c.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("AutoMonitorBrightness", "0.1"));
         return c;
     }
 

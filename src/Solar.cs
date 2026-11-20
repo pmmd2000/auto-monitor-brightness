@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 /// <summary>Sun events for one local calendar day. Times are local; null when the event doesn't happen (polar day/night).</summary>
 public sealed record SunDay(

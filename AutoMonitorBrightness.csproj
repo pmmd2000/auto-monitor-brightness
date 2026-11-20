@@ -7,13 +7,13 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
-    <AssemblyName>Brightly</AssemblyName>
-    <RootNamespace>Brightly</RootNamespace>
-    <ApplicationIcon>assets\Brightly.ico</ApplicationIcon>
+    <AssemblyName>AutoMonitorBrightness</AssemblyName>
+    <RootNamespace>AutoMonitorBrightness</RootNamespace>
+    <ApplicationIcon>assets\AutoMonitorBrightness.ico</ApplicationIcon>
     <Version>0.1.0</Version>
     <InformationalVersion>0.1.0-beta</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
-    <Product>Brightly</Product>
+    <Product>Auto Monitor Brightness</Product>
     <Description>Automatic monitor brightness from the sun and the sky</Description>
 
     <!-- Keep the footprint small: no satellite resources, workstation non-concurrent GC. -->
@@ -25,7 +25,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="assets\Brightly.ico" LogicalName="Brightly.ico" />
+    <EmbeddedResource Include="assets\AutoMonitorBrightness.ico" LogicalName="AutoMonitorBrightness.ico" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 internal static class Program
 {
@@ -8,15 +8,15 @@ internal static class Program
         if (args.Length > 0 && args[0] == "--selftest")
             return SelfTest.Run(args.Skip(1).ToArray());
 
-        using var mutex = new Mutex(true, @"Local\Brightly-SingleInstance", out bool first);
-        using var showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, @"Local\Brightly-ShowSettings");
+        using var mutex = new Mutex(true, @"Local\AutoMonitorBrightness-SingleInstance", out bool first);
+        using var showSignal = new EventWaitHandle(false, EventResetMode.AutoReset, @"Local\AutoMonitorBrightness-ShowSettings");
         if (!first)
         {
             showSignal.Set(); // already running: just open its settings window
             return 0;
         }
 
-        // Run from Downloads (or anywhere else)? Copy into %LOCALAPPDATA%\Programs\Brightly and start that copy,
+        // Run from Downloads (or anywhere else)? Copy into %LOCALAPPDATA%\Programs\AutoMonitorBrightness and start that copy,
         // so autostart keeps working after the download is cleaned up. --portable skips this.
         if (!Installer.IsInstalledCopy && !args.Contains("--portable") && !args.Contains("--autostart") && Installer.TryInstallSelf())
         {
@@ -31,6 +31,7 @@ internal static class Program
         Application.ThreadException += (_, e) => Log.Write("UI error: " + e.Exception);
         AppDomain.CurrentDomain.UnhandledException += (_, e) => Log.Write("Fatal: " + e.ExceptionObject);
 
+        Migration.FromOldName();
         bool firstRun = !AppSettings.Exists;
         var settings = AppSettings.Load();
         if (firstRun)

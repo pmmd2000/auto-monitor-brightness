@@ -1,4 +1,4 @@
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 /// <summary>
 /// The everyday window: where you are (found automatically), which monitors were found, and how bright you
@@ -39,7 +39,7 @@ public sealed class SettingsForm : Form
         SuspendLayout();
         AutoScaleDimensions = new SizeF(96F, 96F);
         AutoScaleMode = AutoScaleMode.Dpi;
-        Text = "Brightly";
+        Text = "Auto Monitor Brightness";
         Icon = AppIcon.Full;
         Font = new Font("Segoe UI", 9F);
         StartPosition = FormStartPosition.CenterScreen;
@@ -179,7 +179,7 @@ public sealed class SettingsForm : Form
             Image = new Icon(AppIcon.Full, 48, 48).ToBitmap(), SizeMode = PictureBoxSizeMode.Zoom,
             Size = new Size(44, 44), Margin = new Padding(0, 0, 12, 0),
         };
-        var title = new Label { Text = "Brightly", AutoSize = true, Font = new Font("Segoe UI Semibold", 15F), Margin = Padding.Empty };
+        var title = new Label { Text = "Auto Monitor Brightness", AutoSize = true, Font = new Font("Segoe UI Semibold", 15F), Margin = Padding.Empty };
         var sub = Grey("Your monitors follow the daylight and the weather. Choose how bright you like them by day and at night; the rest is automatic.");
         sub.MaximumSize = new Size(420, 0);
         var text = new FlowLayoutPanel { FlowDirection = FlowDirection.TopDown, AutoSize = true, WrapContents = false, Margin = Padding.Empty };
@@ -351,7 +351,7 @@ public sealed class SettingsForm : Form
         if (list.Count == 0)
             return !ctl.MonitorsScanned
                 ? "Looking for monitors…"
-                : "No external monitor found yet. Brightly controls monitors that support DDC/CI (most do; built-in laptop screens aren't supported yet).";
+                : "No external monitor found yet. Auto Monitor Brightness controls monitors that support DDC/CI (most do; built-in laptop screens aren't supported yet).";
         var ok = list.Where(m => m.Reachable).Select(m => m.Name).ToList();
         var bad = list.Where(m => !m.Reachable).Select(m => m.Name).ToList();
         var text = ok.Count switch

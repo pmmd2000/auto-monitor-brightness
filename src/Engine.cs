@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 public sealed record Evaluation(
     int Target,             // final brightness % (before per-monitor offsets)

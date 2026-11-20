@@ -1,8 +1,8 @@
-# Regenerates assets\Brightly.ico (a sun on a night-blue tile) at every size Windows asks for.
+# Regenerates assets\AutoMonitorBrightness.ico (a sun on a night-blue tile) at every size Windows asks for.
 # Run with Windows PowerShell:  powershell -File tools\make-icon.ps1
 Add-Type -AssemblyName System.Drawing
 
-$out = Join-Path $PSScriptRoot '..\assets\Brightly.ico'
+$out = Join-Path $PSScriptRoot '..\assets\AutoMonitorBrightness.ico'
 $sizes = 16, 20, 24, 32, 40, 48, 64, 128, 256
 
 function New-Frame([int]$s) {

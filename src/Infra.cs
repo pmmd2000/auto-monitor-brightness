@@ -1,13 +1,13 @@
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 public static class Log
 {
     public static readonly string Dir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Brightly");
-    public static string FilePath => Path.Combine(Dir, "brightly.log");
+        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AutoMonitorBrightness");
+    public static string FilePath => Path.Combine(Dir, "AutoMonitorBrightness.log");
     static readonly object Sync = new();
     /// <summary>Turned off during uninstall so nothing recreates the data folder.</summary>
     public static bool Enabled = true;
@@ -36,7 +36,7 @@ public static class Autostart
     // Windows' own on/off switch for each Run entry (Settings → Apps → Startup, Task Manager → Startup apps).
     // Recent Windows 11 builds skip a Run entry that has no record here, so we write "enabled" ourselves.
     const string ApprovedPath = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
-    const string Name = "Brightly";
+    const string Name = "AutoMonitorBrightness";
     static string Command => $"\"{Environment.ProcessPath}\" --autostart";
 
     /// <summary>True when the Run entry exists and Windows hasn't switched it off in Startup apps.</summary>
@@ -101,7 +101,7 @@ public sealed class PowerWatcher : NativeWindow, IDisposable
 
     public PowerWatcher()
     {
-        CreateHandle(new CreateParams { Caption = "BrightlyPowerWatcher" });
+        CreateHandle(new CreateParams { Caption = "AutoMonitorBrightnessPowerWatcher" });
         var g = Native.GUID_CONSOLE_DISPLAY_STATE;
         notification = Native.RegisterPowerSettingNotification(Handle, ref g, 0);
     }
@@ -153,18 +153,18 @@ public static class AppIcon
 
     static Icon Load()
     {
-        using var s = typeof(AppIcon).Assembly.GetManifestResourceStream("Brightly.ico")!;
+        using var s = typeof(AppIcon).Assembly.GetManifestResourceStream("AutoMonitorBrightness.ico")!;
         return new Icon(s);
     }
 }
 
-/// <summary>Keeps one copy of Brightly in %LOCALAPPDATA%\Programs\Brightly so autostart survives a cleaned Downloads folder.</summary>
+/// <summary>Keeps one copy of Auto Monitor Brightness in %LOCALAPPDATA%\Programs\AutoMonitorBrightness so autostart survives a cleaned Downloads folder.</summary>
 public static class Installer
 {
     public static readonly string Dir = Path.Combine(
-        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "Brightly");
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "AutoMonitorBrightness");
 
-    public static string InstalledExe => Path.Combine(Dir, "Brightly.exe");
+    public static string InstalledExe => Path.Combine(Dir, "AutoMonitorBrightness.exe");
 
     public static bool IsInstalledCopy =>
         string.Equals(Path.GetFullPath(Environment.ProcessPath ?? ""), Path.GetFullPath(InstalledExe), StringComparison.OrdinalIgnoreCase);
@@ -200,6 +200,52 @@ public static class Installer
             {
                 CreateNoWindow = true, UseShellExecute = false,
             });
+        }
+    }
+}
+
+/// <summary>One-time move from the app's old name (Brightly): settings, startup entry and the old program folder.</summary>
+public static class Migration
+{
+    const string OldName = "Brightly";
+
+    public static void FromOldName()
+    {
+        try
+        {
+            // Stop an old copy so the two don't fight over the monitors.
+            foreach (var p in System.Diagnostics.Process.GetProcessesByName(OldName))
+            {
+                try { p.Kill(); p.WaitForExit(3000); } catch { /* not ours to stop, or already gone */ }
+                p.Dispose();
+            }
+
+            var oldData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), OldName);
+            var oldSettings = Path.Combine(oldData, "settings.json");
+            if (File.Exists(oldSettings) && !AppSettings.Exists)
+            {
+                Directory.CreateDirectory(Log.Dir);
+                File.Copy(oldSettings, AppSettings.FilePath);
+                Log.Write("Moved settings from the old Brightly install");
+            }
+            if (Directory.Exists(oldData)) Directory.Delete(oldData, true);
+
+            bool hadAutostart;
+            using (var run = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true))
+            {
+                hadAutostart = run?.GetValue(OldName) is string;
+                run?.DeleteValue(OldName, false);
+            }
+            using (var approved = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run", true))
+                approved?.DeleteValue(OldName, false);
+            if (hadAutostart) Autostart.Set(true);
+
+            var oldProgram = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", OldName);
+            if (Directory.Exists(oldProgram)) Directory.Delete(oldProgram, true);
+        }
+        catch (Exception ex)
+        {
+            Log.Write("Migration from Brightly incomplete: " + ex.Message);
         }
     }
 }

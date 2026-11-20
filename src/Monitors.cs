@@ -2,7 +2,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Win32;
 
-namespace Brightly;
+namespace AutoMonitorBrightness;
 
 /// <summary>A physical monitor controlled over DDC/CI (VCP code 0x10 = luminance).</summary>
 public sealed class DisplayMonitor : IDisposable
