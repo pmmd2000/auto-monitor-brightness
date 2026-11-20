@@ -5,7 +5,7 @@
 <p align="center"><b>Automatic monitor brightness for Windows that follows the sun and the clouds, and never misses a change.</b><br>
 A small, set-and-forget alternative to the brightness schedules in Dell Display and Peripherals Manager and other monitor apps.</p>
 
-<p align="center"><a href="../../releases/latest"><b>Download</b></a> · Windows 10/11 · free and open source · <i>beta</i></p>
+<p align="center"><a href="https://github.com/pmmd2000/brightly-auto-monitor-brightness/releases"><b>Download</b></a> · Windows 10/11 · free and open source · <i>beta</i></p>
 
 ---
 
@@ -32,7 +32,7 @@ turns on.
 
 ## Install
 
-1. Download from the [latest release](../../releases/latest):
+1. Download from the [releases page](https://github.com/pmmd2000/brightly-auto-monitor-brightness/releases):
    - **`Brightly.exe`** (under 1 MB) if you have the [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)
      (Windows will offer to install it if you don't), or
    - **`Brightly-standalone.exe`** (about 50 MB) which needs nothing else.
