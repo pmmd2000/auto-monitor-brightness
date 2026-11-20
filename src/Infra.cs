@@ -33,30 +33,60 @@ public static class Log
 public static class Autostart
 {
     const string KeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
+    // Windows' own on/off switch for each Run entry (Settings → Apps → Startup, Task Manager → Startup apps).
+    // Recent Windows 11 builds skip a Run entry that has no record here, so we write "enabled" ourselves.
+    const string ApprovedPath = @"Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run";
     const string Name = "Brightly";
     static string Command => $"\"{Environment.ProcessPath}\" --autostart";
 
+    /// <summary>True when the Run entry exists and Windows hasn't switched it off in Startup apps.</summary>
     public static bool IsEnabled
     {
         get
         {
             using var k = Registry.CurrentUser.OpenSubKey(KeyPath);
-            return k?.GetValue(Name) is string;
+            return k?.GetValue(Name) is string && !DisabledInWindows;
+        }
+    }
+
+    static bool DisabledInWindows
+    {
+        get
+        {
+            using var k = Registry.CurrentUser.OpenSubKey(ApprovedPath);
+            return k?.GetValue(Name) is byte[] { Length: > 0 } b && (b[0] & 1) == 1; // odd first byte = disabled
         }
     }
 
     public static void Set(bool enabled)
     {
-        using var k = Registry.CurrentUser.CreateSubKey(KeyPath);
-        if (enabled) k.SetValue(Name, Command);
-        else k.DeleteValue(Name, false);
+        using (var k = Registry.CurrentUser.CreateSubKey(KeyPath))
+        {
+            if (enabled) k.SetValue(Name, Command);
+            else k.DeleteValue(Name, false);
+        }
+        using var a = Registry.CurrentUser.CreateSubKey(ApprovedPath);
+        if (enabled) a.SetValue(Name, Approved, RegistryValueKind.Binary);
+        else a.DeleteValue(Name, false);
     }
 
-    /// <summary>Keeps the registered path pointing at this exe if it was moved.</summary>
+    static byte[] Approved => [2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
+    /// <summary>
+    /// Keeps the registered path pointing at this exe if it was moved, and adds the missing "enabled" record
+    /// for entries made by older builds. An entry the user switched off in Windows is left alone.
+    /// </summary>
     public static void RefreshPath()
     {
         using var k = Registry.CurrentUser.OpenSubKey(KeyPath);
-        if (k?.GetValue(Name) is string v && v != Command) Set(true);
+        if (k?.GetValue(Name) is not string v) return;
+        using var a = Registry.CurrentUser.OpenSubKey(ApprovedPath);
+        bool hasRecord = a?.GetValue(Name) is byte[];
+        if (v != Command || !hasRecord)
+        {
+            if (DisabledInWindows) return;
+            Set(true);
+        }
     }
 }
 

@@ -94,7 +94,10 @@ public static class Geo
         return list;
     }
 
-    /// <summary>Approximate (city-level) location from the public IP address.</summary>
+    /// <summary>
+    /// Approximate (city-level) location from the public IP address. Throws <see cref="LocationMismatchException"/>
+    /// when that place is in a different time zone from this PC, which almost always means a VPN or proxy.
+    /// </summary>
     public static async Task<GeoResult> FromIpAsync()
     {
         using var doc = JsonDocument.Parse(await WeatherService.Http.GetStringAsync("https://ipwho.is/"));
@@ -104,6 +107,19 @@ public static class Geo
         string name = string.Join(", ", new[] { "city", "region", "country" }
             .Select(k => r.TryGetProperty(k, out var v) ? v.GetString() : null)
             .Where(s => !string.IsNullOrWhiteSpace(s)).Distinct());
+        if (r.TryGetProperty("timezone", out var tz) && tz.TryGetProperty("offset", out var off) && off.TryGetInt32(out int seconds))
+        {
+            var local = TimeZoneInfo.Local.GetUtcOffset(DateTime.UtcNow);
+            if (Math.Abs(local.TotalSeconds - seconds) >= 3600)
+                throw new LocationMismatchException(name);
+        }
         return new GeoResult(name, r.GetProperty("latitude").GetDouble(), r.GetProperty("longitude").GetDouble());
     }
+}
+
+/// <summary>The IP address points somewhere in another time zone (VPN, proxy, or a mobile carrier's gateway).</summary>
+public sealed class LocationMismatchException(string place)
+    : Exception($"your internet connection appears to be in {place}, a different time zone from this PC (a VPN?)")
+{
+    public string Place { get; } = place;
 }

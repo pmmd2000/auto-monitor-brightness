@@ -294,7 +294,9 @@ public sealed class SettingsForm : Form
         if (s.HasLocation)
         {
             placeLabel.Text = s.PlaceName ?? $"{s.Latitude:0.00}, {s.Longitude:0.00}";
-            placeHint.Text = s.AutoLocation ? "found automatically" : "chosen by you";
+            placeHint.Text = !s.AutoLocation ? "chosen by you"
+                : ctl.LocationError != null ? "found automatically (kept: the latest check looked like a VPN)"
+                : "found automatically";
             changeLink.Visible = true;
         }
         else if (ctl.LocationError != null && !ctl.DetectingLocation)

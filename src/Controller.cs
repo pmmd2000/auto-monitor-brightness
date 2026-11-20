@@ -82,6 +82,15 @@ public sealed class Controller : IDisposable
             Log.Write($"Location detected: {r.Display}");
             UpdateSettings(s);
         }
+        catch (LocationMismatchException ex)
+        {
+            // VPN or proxy: keep the last good location and look again later.
+            LocationError = ex.Message;
+            nextGeoUtc = DateTime.UtcNow.AddHours(3);
+            Log.Write(Settings.HasLocation
+                ? $"Ignoring IP location {ex.Place} (different time zone, probably a VPN); keeping {Settings.PlaceName}"
+                : $"Ignoring IP location {ex.Place} (different time zone, probably a VPN); please pick a city");
+        }
         catch (Exception ex)
         {
             LocationError = ex.Message;
