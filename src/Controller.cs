@@ -134,13 +134,13 @@ public sealed class Controller : IDisposable
     /// <summary>Manual brightness from the tray: applies to every enabled monitor (keeping offsets) and pauses automation.</summary>
     public async Task SetManualAsync(int percent)
     {
-        await gate.WaitAsync();
+        if (!await gate.WaitAsync(TimeSpan.FromSeconds(45))) { Log.Write("Manual set skipped: monitors busy"); return; }
         try
         {
             var s = Settings;
             PausedUntilUtc = DateTime.UtcNow.AddMinutes(Math.Max(5, s.OverrideMinutes));
             PauseReason = "manual brightness";
-            Monitors = await Task.Run(() =>
+            Monitors = await RunMonitorWork(() =>
             {
                 var states = new List<MonitorState>();
                 var mons = MonitorManager.OpenAll();
@@ -164,7 +164,7 @@ public sealed class Controller : IDisposable
                 }
                 finally { foreach (var m in mons) m.Dispose(); }
                 return states;
-            });
+            }, "manual set") ?? Monitors;
             Log.Write($"Manual brightness {percent}% — automation paused until {PausedUntilUtc.Value.ToLocalTime():HH:mm}");
         }
         catch (Exception ex) { Log.Write("Manual set failed: " + ex); }
@@ -197,7 +197,7 @@ public sealed class Controller : IDisposable
             if (!s.HasLocation)
             {
                 LastEvaluation = null;
-                Monitors = await Task.Run(() => ReadOnly(s));
+                Monitors = await RunMonitorWork(() => ReadOnly(s), "read") ?? Monitors;
                 return;
             }
 
@@ -206,7 +206,8 @@ public sealed class Controller : IDisposable
             var eval = Engine.Evaluate(s, now, ratio, sun);
             LastEvaluation = eval;
 
-            Monitors = await Task.Run(() => Apply(s, eval, kind, reason, now));
+            Monitors = await RunMonitorWork(() => Apply(s, eval, kind, reason, now), "apply") ?? Monitors;
+            Heartbeat(now);
         }
         catch (Exception ex)
         {
@@ -216,6 +217,57 @@ public sealed class Controller : IDisposable
         {
             gate.Release();
             Changed?.Invoke();
+        }
+    }
+
+    /// <summary>
+    /// Runs DDC/CI work off the UI thread with a time limit. A monitor or driver that never answers must not
+    /// hold the lock forever (that would freeze every later tick); the stuck call is abandoned and logged.
+    /// </summary>
+    static async Task<List<MonitorState>?> RunMonitorWork(Func<List<MonitorState>> work, string what)
+    {
+        var task = Task.Run(work);
+        try
+        {
+            return await task.WaitAsync(TimeSpan.FromSeconds(30));
+        }
+        catch (TimeoutException)
+        {
+            Log.Write($"Monitor {what} took over 30 s and was abandoned (a monitor or its driver stopped answering)");
+            _ = task.ContinueWith(t => _ = t.Exception, TaskContinuationOptions.OnlyOnFaulted);
+            return null;
+        }
+    }
+
+    // ---- status line every 30 min, so the log shows what happened even when nothing changed ----
+
+    DateTime nextHeartbeatUtc = DateTime.MinValue;
+    static readonly string[] OtherBrightnessApps = ["DDPM.Subagent.User", "DDM", "DellDisplayManager"];
+
+    void Heartbeat(DateTime now)
+    {
+        if (now < nextHeartbeatUtc) return;
+        nextHeartbeatUtc = now.AddMinutes(30);
+        var e = LastEvaluation;
+        var mons = string.Join(", ", Monitors.Select(m => $"{m.Name} {(m.Reachable && m.Percent >= 0 ? m.Percent + "%" : "no reply")}"));
+        var state = IsPaused ? $"paused ({PauseReason}) until {PausedUntilUtc!.Value.ToLocalTime():HH:mm}" : "automatic";
+        Log.Write($"Status: {state}, target {e?.Target}%, sun {e?.Elevation:0.0}°; {mons}");
+        if (OtherBrightnessAppRunning) Log.Write("Note: Dell Display and Peripheral Manager is running; if its brightness schedule is on, the two apps fight");
+    }
+
+    /// <summary>Dell Display and Peripheral Manager (or the older Dell Display Manager) is running.</summary>
+    public static bool OtherBrightnessAppRunning
+    {
+        get
+        {
+            foreach (var name in OtherBrightnessApps)
+            {
+                var ps = System.Diagnostics.Process.GetProcessesByName(name);
+                bool any = ps.Length > 0;
+                foreach (var p in ps) p.Dispose();
+                if (any) return true;
+            }
+            return false;
         }
     }
 

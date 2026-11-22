@@ -363,6 +363,9 @@ public sealed class SettingsForm : Form
         if (bad.Count > 0)
             text += (text.Length > 0 ? "\n" : "") +
                     $"{string.Join(", ", bad)} didn't respond. Turn on DDC/CI in the monitor's on-screen menu.";
+        if (Controller.OtherBrightnessAppRunning)
+            text += (text.Length > 0 ? Environment.NewLine : "") +
+                    "Dell Display and Peripheral Manager is also running. Turn off its brightness schedule, or the two apps will keep overriding each other.";
         return text;
     }
 

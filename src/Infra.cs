@@ -25,7 +25,16 @@ public static class Log
                 File.AppendAllText(FilePath, $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}  {message}{Environment.NewLine}");
             }
         }
-        catch { /* logging must never take the app down */ }
+        catch (Exception ex)
+        {
+            // Logging must never take the app down, but a silent log hides problems: note why in %TEMP%.
+            try
+            {
+                File.AppendAllText(Path.Combine(Path.GetTempPath(), "AutoMonitorBrightness-fallback.log"),
+                    $"{DateTime.Now:yyyy-MM-dd HH:mm:ss}  log write failed ({ex.GetType().Name}: {ex.Message}): {message}{Environment.NewLine}");
+            }
+            catch { /* nothing more we can do */ }
+        }
     }
 }
 
