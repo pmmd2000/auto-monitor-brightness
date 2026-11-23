@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -10,8 +10,8 @@
     <AssemblyName>AutoMonitorBrightness</AssemblyName>
     <RootNamespace>AutoMonitorBrightness</RootNamespace>
     <ApplicationIcon>assets\AutoMonitorBrightness.ico</ApplicationIcon>
-    <Version>0.1.0</Version>
-    <InformationalVersion>0.1.0-beta</InformationalVersion>
+    <Version>0.1.1</Version>
+    <InformationalVersion>0.1.1-beta</InformationalVersion>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Product>Auto Monitor Brightness</Product>
     <Description>Automatic monitor brightness from the sun and the sky</Description>
